@@ -16,9 +16,20 @@ else:
     DATABASE_URL = "sqlite:///" + _database_path.as_posix()
 
 
+# Normalize PostgreSQL URLs for the synchronous psycopg driver.
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = "postgresql+psycopg://" + DATABASE_URL[len("postgres://"):]
+elif DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = "postgresql+psycopg://" + DATABASE_URL[len("postgresql://"):]
+
+# SQLite needs this option; PostgreSQL does not.
+_engine_kwargs = {}
+if DATABASE_URL.startswith("sqlite:"):
+    _engine_kwargs["connect_args"] = {"check_same_thread": False}
+
 engine = create_engine(
     DATABASE_URL,
-    connect_args={"check_same_thread": False},
+    **_engine_kwargs,
 )
 
 SessionLocal = sessionmaker(
