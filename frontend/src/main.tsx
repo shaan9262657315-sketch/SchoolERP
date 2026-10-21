@@ -14,6 +14,7 @@ import FinancePage from './pages/FinancePage.tsx'
 import StudentDashboard from './pages/StudentDashboard.tsx'
 import SchoolProfile from './pages/SchoolProfile.tsx'
 import PlatformManagement from './pages/PlatformManagement'
+import PlatformLogin from './pages/PlatformLogin'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -31,6 +32,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/super-admin/login" element={<SuperAdminLogin />} />
       <Route path="/super-admin" element={<SuperAdminDashboard />} />
       <Route path="/super-admin/platform" element={<PlatformManagement />} />
+        <Route path="/platform/login" element={<PlatformLogin />} />
       <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

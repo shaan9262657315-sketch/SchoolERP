@@ -161,11 +161,19 @@ export default function AdminDashboard() {
 
     const data = await response.json().catch(() => ({}))
 
-    if (response.status === 401 || response.status === 403) {
+    if (response.status === 401) {
       sessionStorage.removeItem('school_erp_token')
       sessionStorage.removeItem('school_erp_admin')
       navigate('/login', { replace: true })
-      throw new Error('Session invalid hai. Dobara login karein.')
+      throw new Error('Session expire ho gaya. Dobara login karein.')
+    }
+
+    if (response.status === 403) {
+      throw new Error(
+        typeof data.detail === 'string'
+          ? data.detail
+          : 'Is feature ko access karne ki permission nahi hai.'
+      )
     }
 
     if (!response.ok) {

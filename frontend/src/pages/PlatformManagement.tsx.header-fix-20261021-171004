@@ -1,0 +1,490 @@
+import { useCallback, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { API_URL } from '../services/api'
+
+type Item = Record<string, any>
+type PlatformSessionAccount = { role?: string; permissions?: string[] }
+
+function readPlatformSessionAccount(): PlatformSessionAccount | null {
+  try {
+    const raw = sessionStorage.getItem('school_erp_platform_account')
+    return raw ? JSON.parse(raw) as PlatformSessionAccount : null
+  } catch {
+    return null
+  }
+}
+
+const permissions = [
+  'accounts:read', 'accounts:manage',
+  'plans:read', 'plans:manage',
+  'subscriptions:read', 'subscriptions:manage',
+  'schools:read',
+]
+const features = [
+  'students', 'teachers', 'attendance', 'results',
+  'fees', 'homework', 'announcements', 'school_profile',
+]
+const roles = ['platform_admin', 'billing_admin', 'support_admin', 'viewer']
+const statuses = ['active', 'trialing', 'past_due', 'cancelled', 'expired']
+const cycles = ['monthly', 'quarterly', 'yearly', 'lifetime']
+
+const defaults: Record<string, string[]> = {
+  platform_admin: permissions,
+  billing_admin: ['plans:read', 'plans:manage', 'subscriptions:read', 'subscriptions:manage', 'schools:read'],
+  support_admin: ['accounts:read', 'schools:read', 'subscriptions:read'],
+  viewer: ['accounts:read', 'plans:read', 'subscriptions:read', 'schools:read'],
+}
+
+const inputStyle: React.CSSProperties = {
+  width: '100%', padding: '10px 12px', border: '1px solid #d1d5db',
+  borderRadius: 8, background: 'white', color: '#111827', boxSizing: 'border-box',
+}
+const buttonStyle: React.CSSProperties = {
+  padding: '9px 13px', border: '1px solid #cbd5e1', borderRadius: 8,
+  cursor: 'pointer', background: 'white', color: '#111827', fontWeight: 600,
+}
+const panelStyle: React.CSSProperties = {
+  background: 'white', border: '1px solid #e5e7eb', borderRadius: 14,
+  padding: 20, marginBottom: 18, minWidth: 0,
+}
+const gridStyle: React.CSSProperties = {
+  display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+  gap: 12, alignItems: 'end',
+}
+
+function rows(data: any, key: string): Item[] {
+  if (Array.isArray(data)) return data
+  if (Array.isArray(data?.[key])) return data[key]
+  return []
+}
+function idOf(item: Item) {
+  return Number(item.id ?? item.school_id ?? item.school_profile_id)
+}
+function listOf(value: unknown): string[] {
+  if (Array.isArray(value)) return value.map(String)
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value)
+      return Array.isArray(parsed) ? parsed.map(String) : []
+    } catch { return [] }
+  }
+  return []
+}
+function messageOf(error: unknown) {
+  return error instanceof Error ? error.message : 'Something went wrong.'
+}
+
+export default function PlatformManagement() {
+  const navigate = useNavigate()
+  const sessionRole = sessionStorage.getItem('school_erp_role')
+  const platformAccount = readPlatformSessionAccount()
+  const isSuperAdmin = sessionRole === 'super_admin'
+  const grantedPermissions = platformAccount?.permissions || []
+  const hasPermission = (permission: string) =>
+    isSuperAdmin || grantedPermissions.includes(permission)
+  const canViewAccounts = hasPermission('accounts:read') || hasPermission('accounts:manage')
+  const canViewPlans = hasPermission('plans:read') || hasPermission('plans:manage')
+  const canViewSubscriptions = hasPermission('subscriptions:read') || hasPermission('subscriptions:manage')
+  const initialTab = canViewAccounts ? 'accounts' : canViewPlans ? 'plans' : 'subscriptions'
+  const [tab, setTab] = useState(initialTab)
+  const [accounts, setAccounts] = useState<Item[]>([])
+  const [plans, setPlans] = useState<Item[]>([])
+  const [schools, setSchools] = useState<Item[]>([])
+  const [subscriptions, setSubscriptions] = useState<Item[]>([])
+  const [loading, setLoading] = useState(true)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
+
+  const [accountForm, setAccountForm] = useState({
+    username: '', password: '', role: 'support_admin',
+    permissions: [...defaults.support_admin],
+  })
+  const [accountEdits, setAccountEdits] = useState<Record<number, { role: string; permissions: string[] }>>({})
+
+  const [planEditId, setPlanEditId] = useState<number | null>(null)
+  const [planForm, setPlanForm] = useState({
+    name: '', description: '', price: '0', billing_cycle: 'monthly',
+    features: ['students', 'teachers', 'attendance'] as string[], is_active: true,
+  })
+
+  const [schoolId, setSchoolId] = useState('')
+  const [subscriptionForm, setSubscriptionForm] = useState({
+    plan_id: '', status: 'active', start_date: new Date().toISOString().slice(0, 10),
+    end_date: '', usePlanFeatures: true, features: [...features] as string[],
+  })
+
+  const request = useCallback(async (path: string, init: RequestInit = {}) => {
+    const token = sessionStorage.getItem('school_erp_token')
+    if (!token) throw new Error('Session missing. Please log in again.')
+    const response = await fetch(`${API_URL}${path}`, {
+      ...init,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+        ...(init.headers || {}),
+      },
+    })
+    const body = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      const detail = body?.detail
+      throw new Error(typeof detail === 'string' ? detail : `Request failed (${response.status}).`)
+    }
+    return body
+  }, [])
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    setError('')
+
+    const role = sessionStorage.getItem('school_erp_role')
+    const isRoot = role === 'super_admin'
+    const account = readPlatformSessionAccount()
+    const granted = account?.permissions || []
+    const allowed = (permission: string) =>
+      isRoot || granted.includes(permission)
+    const canAccounts = allowed('accounts:read') || allowed('accounts:manage')
+    const canPlans = allowed('plans:read') || allowed('plans:manage')
+    const canSchools = allowed('schools:read') || allowed('subscriptions:manage')
+    const canSubscriptions = allowed('subscriptions:read') || allowed('subscriptions:manage')
+
+    const tasks: Promise<void>[] = []
+
+    if (canAccounts) {
+      tasks.push(request('/platform/accounts').then(data => setAccounts(rows(data, 'accounts'))))
+    } else {
+      setAccounts([])
+    }
+
+    if (canPlans) {
+      tasks.push(request('/platform/plans').then(data => setPlans(rows(data, 'plans'))))
+    } else {
+      setPlans([])
+    }
+
+    if (canSchools) {
+      tasks.push(request('/platform/schools').then(data => setSchools(rows(data, 'schools'))))
+    } else {
+      setSchools([])
+    }
+
+    if (canSubscriptions) {
+      tasks.push(request('/platform/subscriptions').then(data => setSubscriptions(rows(data, 'subscriptions'))))
+    } else {
+      setSubscriptions([])
+    }
+
+    try {
+      const results = await Promise.allSettled(tasks)
+      const failed = results.find(result => result.status === 'rejected')
+      if (failed?.status === 'rejected') {
+        throw failed.reason
+      }
+
+      setTab(current => {
+        if (current === 'accounts' && canAccounts) return current
+        if (current === 'plans' && canPlans) return current
+        if (current === 'subscriptions' && canSubscriptions) return current
+        if (canAccounts) return 'accounts'
+        if (canPlans) return 'plans'
+        if (canSubscriptions) return 'subscriptions'
+        return current
+      })
+    } catch (e) {
+      setError(messageOf(e))
+    } finally {
+      setLoading(false)
+    }
+  }, [request])
+
+  useEffect(() => {
+    const role = sessionStorage.getItem('school_erp_role')
+    const token = sessionStorage.getItem('school_erp_token')
+    const account = readPlatformSessionAccount()
+
+    if (!token) {
+      navigate('/platform/login', { replace: true })
+      return
+    }
+
+    if (role === 'platform_admin' && !account) {
+      navigate('/platform/login', { replace: true })
+      return
+    }
+
+    if (role !== 'super_admin' && role !== 'platform_admin') {
+      navigate('/platform/login', { replace: true })
+      return
+    }
+
+    if (
+      role === 'platform_admin' &&
+      !(account?.permissions || []).some(permission =>
+        [
+          'accounts:read', 'accounts:manage',
+          'plans:read', 'plans:manage',
+          'subscriptions:read', 'subscriptions:manage',
+        ].includes(permission),
+      )
+    ) {
+      setError('This platform account has no access to the available management sections.')
+      setLoading(false)
+      return
+    }
+
+    void load()
+  }, [load, navigate])
+
+  const run = async (work: () => Promise<void>, success: string) => {
+    setBusy(true)
+    setError('')
+    setNotice('')
+    try {
+      await work()
+      setNotice(success)
+      await load()
+    } catch (e) {
+      setError(messageOf(e))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const createAccount = (event: React.FormEvent) => {
+    event.preventDefault()
+    void run(async () => {
+      await request('/platform/accounts', {
+        method: 'POST',
+        body: JSON.stringify(accountForm),
+      })
+      setAccountForm({ username: '', password: '', role: 'support_admin', permissions: [...defaults.support_admin] })
+    }, 'Platform account created.')
+  }
+
+  const saveAccount = (account: Item) => {
+    const edit = accountEdits[idOf(account)]
+    if (!edit) return
+    void run(async () => {
+      await request(`/platform/accounts/${idOf(account)}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ role: edit.role, permissions: edit.permissions }),
+      })
+    }, 'Account permissions updated.')
+  }
+
+  const toggleAccount = (account: Item) => {
+    void run(async () => {
+      await request(`/platform/accounts/${idOf(account)}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ is_active: !(account.is_active ?? account.active) }),
+      })
+    }, 'Account status updated.')
+  }
+
+  const editPlan = (plan: Item) => {
+    setPlanEditId(idOf(plan))
+    setPlanForm({
+      name: plan.name || '',
+      description: plan.description || '',
+      price: String((Number(plan.price_cents) || 0) / 100),
+      billing_cycle: plan.billing_cycle || 'monthly',
+      features: listOf(plan.features),
+      is_active: Boolean(plan.is_active),
+    })
+    setTab('plans')
+  }
+
+  const savePlan = (event: React.FormEvent) => {
+    event.preventDefault()
+    void run(async () => {
+      const payload = {
+        name: planForm.name.trim(),
+        description: planForm.description,
+        price_cents: Math.round(Number(planForm.price) * 100),
+        billing_cycle: planForm.billing_cycle,
+        features: planForm.features,
+        is_active: planForm.is_active,
+      }
+      await request(planEditId === null ? '/platform/plans' : `/platform/plans/${planEditId}`, {
+        method: planEditId === null ? 'POST' : 'PATCH',
+        body: JSON.stringify(payload),
+      })
+      setPlanEditId(null)
+      setPlanForm({ name: '', description: '', price: '0', billing_cycle: 'monthly', features: ['students', 'teachers', 'attendance'], is_active: true })
+    }, planEditId === null ? 'Subscription plan created.' : 'Subscription plan updated.')
+  }
+
+  const startSubscriptionEdit = (school: Item) => {
+    const sid = idOf(school)
+    const existing = subscriptions.find(s => Number(s.school_id) === sid)
+    setSchoolId(String(sid))
+    setSubscriptionForm({
+      plan_id: String(existing?.plan_id ?? plans.find(p => p.is_active)?.id ?? ''),
+      status: existing?.status || 'active',
+      start_date: String(existing?.start_date || new Date().toISOString().slice(0, 10)).slice(0, 10),
+      end_date: existing?.end_date ? String(existing.end_date).slice(0, 10) : '',
+      usePlanFeatures: existing ? existing.uses_plan_features !== false : true,
+      features: existing ? listOf(existing.features) : [...features],
+    })
+    setTab('subscriptions')
+  }
+
+  const saveSubscription = (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!schoolId) {
+      setError('Select a school first.')
+      return
+    }
+    void run(async () => {
+      await request(`/platform/subscriptions/${schoolId}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          plan_id: Number(subscriptionForm.plan_id),
+          status: subscriptionForm.status,
+          start_date: subscriptionForm.start_date || null,
+          end_date: subscriptionForm.end_date || null,
+          feature_overrides: subscriptionForm.usePlanFeatures ? null : subscriptionForm.features,
+        }),
+      })
+    }, 'School subscription saved.')
+  }
+
+  const toggleString = (current: string[], value: string, checked: boolean) =>
+    checked ? [...current, value] : current.filter(x => x !== value)
+
+  return (
+    <main style={{ minHeight: '100vh', background: '#f3f6fb', padding: 'clamp(14px, 3vw, 32px)', color: '#111827' }}>
+      <div style={{ maxWidth: 1250, margin: '0 auto' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14, flexWrap: 'wrap', marginBottom: 22 }}>
+          <div>
+            <p style={{ color: '#64748b', fontWeight: 700, margin: '0 0 6px' }}>SCHOOL ERP · PLATFORM CONTROL</p>
+            <h1 style={{ fontSize: 'clamp(25px, 4vw, 34px)', margin: 0 }}>Platform Management</h1>
+            <p style={{ color: '#64748b', marginBottom: 0 }}>Manage platform accounts, subscription plans and school subscriptions.</p>
+          </div>
+          <button style={buttonStyle} onClick={() => { sessionStorage.removeItem('school_erp_token'); sessionStorage.removeItem('school_erp_role'); sessionStorage.removeItem('school_erp_platform_account'); sessionStorage.removeItem('school_erp_super_admin'); navigate(isSuperAdmin ? '/super-admin/login' : '/platform/login') }}><button style={buttonStyle} onClick={() => navigate('/super-admin')}>← Super Admin Dashboard</button></button>
+        </div>
+
+        {error && <div role="alert" style={{ ...panelStyle, color: '#991b1b', borderColor: '#fecaca' }}>{error}</div>}
+        {notice && <div role="status" style={{ ...panelStyle, color: '#166534', borderColor: '#bbf7d0' }}>{notice}</div>}
+
+        <nav style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 18 }}>
+          {[
+            ...(canViewAccounts ? [['accounts', 'Platform Accounts']] : []),
+            ...(canViewPlans ? [['plans', 'Plans']] : []),
+            ...(canViewSubscriptions ? [['subscriptions', 'Subscriptions']] : []),
+          ].map(([key, label]) => (
+            <button key={key} onClick={() => setTab(key)} style={{
+              ...buttonStyle, background: tab === key ? '#1d4ed8' : 'white',
+              color: tab === key ? 'white' : '#111827',
+              borderColor: tab === key ? '#1d4ed8' : '#cbd5e1',
+            }}>{label}</button>
+          ))}
+          <button style={{ ...buttonStyle, marginLeft: 'auto' }} disabled={loading || busy} onClick={() => void load()}>Refresh</button>
+        </nav>
+
+        {loading ? <section style={panelStyle}>Loading platform data…</section> : <>
+          {tab === 'accounts' && <>
+            {hasPermission('accounts:manage') && (<section style={panelStyle}>
+              <h2 style={{ marginTop: 0 }}>Create platform account</h2>
+              <form onSubmit={createAccount}>
+                <div style={gridStyle}>
+                  <label>Username<input required minLength={3} style={inputStyle} value={accountForm.username} onChange={e => setAccountForm({ ...accountForm, username: e.target.value })} /></label>
+                  <label>Temporary password<input required minLength={8} type="password" style={inputStyle} value={accountForm.password} onChange={e => setAccountForm({ ...accountForm, password: e.target.value })} /></label>
+                  <label>Role<select style={inputStyle} value={accountForm.role} onChange={e => setAccountForm({ ...accountForm, role: e.target.value, permissions: [...(defaults[e.target.value] || [])] })}>{roles.map(r => <option key={r}>{r}</option>)}</select></label>
+                </div>
+                <p style={{ fontWeight: 700 }}>Permissions</p>
+                <div style={gridStyle}>
+                  {permissions.map(permission => <label key={permission} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <input type="checkbox" checked={accountForm.permissions.includes(permission)} onChange={e => setAccountForm({ ...accountForm, permissions: toggleString(accountForm.permissions, permission, e.target.checked) })} />{permission}
+                  </label>)}
+                </div>
+                <button disabled={busy} style={{ ...buttonStyle, marginTop: 16, background: '#1d4ed8', color: 'white' }}>Create account</button>
+              </form>
+            </section>) }
+            <section style={panelStyle}>
+              <h2 style={{ marginTop: 0 }}>Existing platform accounts ({accounts.length})</h2>
+              {accounts.length === 0 && <p>No platform accounts returned by the API.</p>}
+              {accounts.map(account => {
+                const aid = idOf(account)
+                const edit = accountEdits[aid] || { role: account.role || 'viewer', permissions: listOf(account.permissions) }
+                return <div key={aid} style={{ borderTop: '1px solid #e5e7eb', padding: '16px 0' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+                    <div><strong>{account.username || `Account #${aid}`}</strong><div style={{ color: '#64748b', fontSize: 13 }}>ID: {aid} · {account.is_active ?? account.active ? 'Active' : 'Inactive'}</div></div>
+                    {hasPermission('accounts:manage') && (<button style={buttonStyle} disabled={busy} onClick={() => toggleAccount(account)}>{account.is_active ?? account.active ? 'Deactivate' : 'Activate'}</button>) }
+                  </div>
+                  <div style={{ ...gridStyle, marginTop: 12 }}>
+                    <label>Role<select disabled={!hasPermission('accounts:manage')} style={inputStyle} value={edit.role} onChange={e => setAccountEdits({ ...accountEdits, [aid]: { ...edit, role: e.target.value } })}>{roles.map(r => <option key={r}>{r}</option>)}</select></label>
+                    <div><strong>Permissions</strong><div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 8 }}>{permissions.map(p => <label key={p} style={{ display: 'flex', gap: 5, alignItems: 'center', fontSize: 13 }}><input type="checkbox" disabled={!hasPermission('accounts:manage')} checked={edit.permissions.includes(p)} onChange={e => setAccountEdits({ ...accountEdits, [aid]: { ...edit, permissions: toggleString(edit.permissions, p, e.target.checked) } })} />{p}</label>)}</div></div>
+                  </div>
+                  {hasPermission('accounts:manage') && (<button style={{ ...buttonStyle, marginTop: 12 }} disabled={busy} onClick={() => saveAccount(account)}>Save role & permissions</button>) }
+                </div>
+              })}
+            </section>
+          </>}
+
+          {tab === 'plans' && <>
+            {hasPermission('plans:manage') && (<section style={panelStyle}>
+              <h2 style={{ marginTop: 0 }}>{planEditId === null ? 'Create subscription plan' : `Edit plan #${planEditId}`}</h2>
+              <form onSubmit={savePlan}>
+                <div style={gridStyle}>
+                  <label>Plan name<input required minLength={2} style={inputStyle} value={planForm.name} onChange={e => setPlanForm({ ...planForm, name: e.target.value })} /></label>
+                  <label>Price (INR)<input required min="0" type="number" step="0.01" style={inputStyle} value={planForm.price} onChange={e => setPlanForm({ ...planForm, price: e.target.value })} /></label>
+                  <label>Billing cycle<select style={inputStyle} value={planForm.billing_cycle} onChange={e => setPlanForm({ ...planForm, billing_cycle: e.target.value })}>{cycles.map(c => <option key={c}>{c}</option>)}</select></label>
+                  <label>Description<input style={inputStyle} value={planForm.description} onChange={e => setPlanForm({ ...planForm, description: e.target.value })} /></label>
+                </div>
+                <p style={{ fontWeight: 700 }}>Included features</p>
+                <div style={gridStyle}>{features.map(feature => <label key={feature} style={{ display: 'flex', gap: 8, alignItems: 'center' }}><input type="checkbox" checked={planForm.features.includes(feature)} onChange={e => setPlanForm({ ...planForm, features: toggleString(planForm.features, feature, e.target.checked) })} />{feature.replaceAll('_', ' ')}</label>)}</div>
+                <label style={{ display: 'flex', gap: 8, marginTop: 14 }}><input type="checkbox" checked={planForm.is_active} onChange={e => setPlanForm({ ...planForm, is_active: e.target.checked })} />Plan active and available for assignment</label>
+                <div style={{ display: 'flex', gap: 8, marginTop: 16 }}><button disabled={busy} style={{ ...buttonStyle, background: '#1d4ed8', color: 'white' }}>{planEditId === null ? 'Create plan' : 'Save plan'}</button>{planEditId !== null && <button type="button" style={buttonStyle} onClick={() => { setPlanEditId(null); setPlanForm({ name: '', description: '', price: '0', billing_cycle: 'monthly', features: ['students', 'teachers', 'attendance'], is_active: true }) }}>Cancel edit</button>}</div>
+              </form>
+            </section>) }
+            <section style={panelStyle}>
+              <h2 style={{ marginTop: 0 }}>Subscription plans ({plans.length})</h2>
+              {plans.map(plan => <div key={idOf(plan)} style={{ borderTop: '1px solid #e5e7eb', padding: '15px 0', display: 'flex', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap' }}>
+                <div><strong>{plan.name}</strong> · ₹{(Number(plan.price_cents) || 0) / 100} / {plan.billing_cycle}<div style={{ color: '#64748b', marginTop: 5 }}>{plan.description || 'No description'} · {plan.is_active ? 'Active' : 'Inactive'}</div><div style={{ fontSize: 13, marginTop: 5 }}>Features: {listOf(plan.features).join(', ') || 'None'}</div></div>
+                {hasPermission('plans:manage') && (<button style={buttonStyle} onClick={() => editPlan(plan)}>Edit plan</button>) }
+              </div>)}
+            </section>
+          </>}
+
+          {tab === 'subscriptions' && <>
+            {hasPermission('subscriptions:manage') && (<section style={panelStyle}>
+              <h2 style={{ marginTop: 0 }}>Assign a school subscription</h2>
+              <form onSubmit={saveSubscription}>
+                <div style={gridStyle}>
+                  <label>School<select required style={inputStyle} value={schoolId} onChange={e => {
+                    const school = schools.find(s => idOf(s) === Number(e.target.value))
+                    if (school) startSubscriptionEdit(school)
+                    else setSchoolId(e.target.value)
+                  }}><option value="">Select school</option>{schools.map(s => <option key={idOf(s)} value={idOf(s)}>{s.school_name || s.name || `School #${idOf(s)}`}</option>)}</select></label>
+                  <label>Plan<select required style={inputStyle} value={subscriptionForm.plan_id} onChange={e => setSubscriptionForm({ ...subscriptionForm, plan_id: e.target.value })}><option value="">Select plan</option>{plans.filter(p => p.is_active).map(p => <option key={idOf(p)} value={idOf(p)}>{p.name} · ₹{(Number(p.price_cents) || 0) / 100}</option>)}</select></label>
+                  <label>Status<select style={inputStyle} value={subscriptionForm.status} onChange={e => setSubscriptionForm({ ...subscriptionForm, status: e.target.value })}>{statuses.map(s => <option key={s}>{s}</option>)}</select></label>
+                  <label>Start date<input type="date" style={inputStyle} value={subscriptionForm.start_date} onChange={e => setSubscriptionForm({ ...subscriptionForm, start_date: e.target.value })} /></label>
+                  <label>Expiry date (optional)<input type="date" style={inputStyle} value={subscriptionForm.end_date} onChange={e => setSubscriptionForm({ ...subscriptionForm, end_date: e.target.value })} /></label>
+                </div>
+                <p style={{ fontWeight: 700 }}>Feature access</p>
+                <label style={{ display: 'flex', gap: 8, marginBottom: 12 }}><input type="checkbox" checked={subscriptionForm.usePlanFeatures} onChange={e => setSubscriptionForm({ ...subscriptionForm, usePlanFeatures: e.target.checked })} />Use the selected plan's default features</label>
+                {!subscriptionForm.usePlanFeatures && <div style={gridStyle}>{features.map(feature => <label key={feature} style={{ display: 'flex', gap: 8, alignItems: 'center' }}><input type="checkbox" checked={subscriptionForm.features.includes(feature)} onChange={e => setSubscriptionForm({ ...subscriptionForm, features: toggleString(subscriptionForm.features, feature, e.target.checked) })} />{feature.replaceAll('_', ' ')}</label>)}</div>}
+                <button disabled={busy || !plans.some(p => String(idOf(p)) === subscriptionForm.plan_id && p.is_active)} style={{ ...buttonStyle, marginTop: 16, background: '#1d4ed8', color: 'white' }}>Save subscription</button>
+              </form>
+            </section>) }
+            <section style={panelStyle}>
+              <h2 style={{ marginTop: 0 }}>School subscriptions ({subscriptions.length})</h2>
+              {subscriptions.map(sub => <div key={sub.id ?? sub.school_id} style={{ borderTop: '1px solid #e5e7eb', padding: '15px 0', display: 'flex', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap' }}>
+                <div><strong>{sub.school_name || `School #${sub.school_id}`}</strong><div style={{ color: '#64748b', marginTop: 5 }}>Plan: {sub.plan_name} · Status: {sub.status}</div><div style={{ color: '#64748b', fontSize: 13, marginTop: 4 }}>Start: {sub.start_date || '—'} · Expiry: {sub.end_date || 'No expiry'}</div><div style={{ fontSize: 13, marginTop: 4 }}>Features: {listOf(sub.features).join(', ') || 'None'}{sub.uses_plan_features ? ' (plan defaults)' : ' (custom)'}</div></div>
+                {hasPermission('subscriptions:manage') && (<button type="button" style={buttonStyle} onClick={() => {
+  startSubscriptionEdit({ id: sub.school_id, school_id: sub.school_id })
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}}>Manage</button>) }
+              </div>)}
+            </section>
+          </>}
+        </>}
+
+        <p style={{ color: '#64748b', fontSize: 12, lineHeight: 1.6 }}>
+          Feature selections are saved as subscription entitlements. Enforcing those entitlements on every school-facing API endpoint is a separate backend step; this page alone does not block access to excluded modules.
+        </p>
+      </div>
+    </main>
+  )
+}

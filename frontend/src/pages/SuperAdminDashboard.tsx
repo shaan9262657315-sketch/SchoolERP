@@ -446,7 +446,19 @@ export default function SuperAdminDashboard() {
         </section>
 
         <section className="sa-management-grid">
-          <article className="sa-management-card sa-featured-card">
+          <article
+            className="sa-management-card sa-featured-card"
+            role="button"
+            tabIndex={0}
+            onClick={() => document.getElementById('school-directory')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                document.getElementById('school-directory')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }
+            }}
+            style={{ cursor: 'pointer' }}
+          >
             <div className="sa-card-icon">?</div>
             <span className="sa-card-status">NEXT PHASE</span>
             <h3>School directory</h3>
@@ -454,20 +466,20 @@ export default function SuperAdminDashboard() {
             <div className="sa-card-footer">School Directory API connected</div>
           </article>
           <article className="sa-management-card">
-            <div className="sa-card-icon">?</div>
+            <div className="sa-card-icon">♙</div>
             <span className="sa-card-status">AVAILABLE</span>
-            <h3>Platform accounts</h3>
-<p><a href="/super-admin/platform" style={{ display: "inline-block", marginTop: 10, fontWeight: 700, color: "#2563eb" }}>Open Platform Management →</a></p>
-            <p>Manage platform-level administrators without changing school Admin accounts.</p>
-            <div className="sa-card-footer">Separate role and permissions</div>
+            <h3>Platform Accounts</h3>
+            <p>Manage platform administrator accounts, roles, and permissions.</p>
+            <p><a href="/super-admin/platform?tab=accounts" style={{ display: "inline-block", marginTop: 10, fontWeight: 700, color: "#2563eb" }}>Manage Platform Accounts -&gt;</a></p>
+            <div className="sa-card-footer">Separate roles and permissions</div>
           </article>
           <article className="sa-management-card">
-            <div className="sa-card-icon">?</div>
+            <div className="sa-card-icon">$</div>
             <span className="sa-card-status">AVAILABLE</span>
-            <h3>Plans and subscriptions</h3>
-<p><a href="/super-admin/platform" style={{ display: "inline-block", marginTop: 10, fontWeight: 700, color: "#2563eb" }}>Manage Plans &amp; Subscriptions →</a></p>
-            <p>Prepare school-wise plans, feature access and subscription status.</p>
-            <div className="sa-card-footer">No subscription data has been created</div>
+            <h3>Plans &amp; Subscriptions</h3>
+            <p>Create and manage subscription plans, school access, and subscription status.</p>
+            <p><a href="/super-admin/platform?tab=plans" style={{ display: "inline-block", marginTop: 10, fontWeight: 700, color: "#2563eb" }}>Manage Plans &amp; Subscriptions -&gt;</a></p>
+            <div className="sa-card-footer">Subscription management</div>
           </article>
         </section>
 
@@ -545,7 +557,7 @@ export default function SuperAdminDashboard() {
           )}
         </section>
 
-        <section className="sa-directory-section">
+        <section id="school-directory" className="sa-directory-section">
           <div className="sa-section-heading">
             <div>
               <h2>School Directory</h2>
@@ -578,7 +590,7 @@ export default function SuperAdminDashboard() {
                   <h3>{school.school_name}</h3>
                   <p>{school.address || 'Address not added yet'}</p>
                   <p>Admin username: <strong>{school.admin_username}</strong></p>
-                  <p>Students: <strong>{school.student_count}</strong> Â· Teachers: <strong>{school.teacher_count}</strong></p>
+                  <p>Students: <strong>{school.student_count}</strong> · Teachers: <strong>{school.teacher_count}</strong></p>
                   {school.slug && (
                     <p>
                       Public website: <a href={`/schools/${school.slug}`} target="_blank" rel="noreferrer">
