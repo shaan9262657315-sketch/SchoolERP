@@ -1,0 +1,6 @@
+.finance-page{max-width:1440px;margin-inline:auto;min-width:0}
+.finance-page>.erp-heading{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:26px;padding:clamp(20px,3vw,32px);border:1px solid #e3eaf4;border-radius:20px;background:radial-gradient(circle at 90% 10%,rgba(103,126,234,.12),transparent 35%),linear-gradient(135deg,#fff,#f7f9ff);box-shadow:0 12px 35px rgba(15,23,42,.045)}
+.finance-page>.erp-heading h1{margin:5px 0 9px;color:#101b31;letter-spacing:-.04em}
+.finance-page>.erp-heading .erp-subtitle{max-width:680px;color:#64748b;line-height:1.65}
+.finance-error{margin:16px 0;padding:14px 16px;border:1px solid #e6a5a5;border-radius:12px;background:#fff1f1;color:#9b2222}
+@media(max-width:600px){.finance-page>.erp-heading{align-items:flex-start;padding:18px}}

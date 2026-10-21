@@ -1,0 +1,108 @@
+
+.env
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+# Python virtual environments and generated files
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+# Local databases and database sidecar files
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+# Frontend dependencies and build output
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+# Local logs and safety backups
+*.log
+*.backup_*
+*.bak
+
+# SchoolERP deployment safety rules
+**/.env
+**/.env.*
+!**/.env.example
+**/venv/
+**/.venv/
+**/__pycache__/
+**/*.py[cod]
+**/node_modules/
+**/dist/
+**/.vite/
+**/chroma_db/
+**/school_erp.db
+**/school_erp.db-*
+**/*.sqlite
+**/*.sqlite3
+**/backups/
+**/backup_*/
+**/pdfs/*
+!**/pdfs/.gitkeep
+
+# Deployment repository cleanup rules
+# Local backups and previous source versions
+*.backup
+*.backup*
+*.subscription-backup-*
+*.before-edit-*
+*_backup_*
+*_before_*
+.gitignore.backup*
+**/class_access_backup/
+**/*inspection*.txt
+**/*source*.txt
+**/*readonly_test.py
+
+# Local-only maintenance and data-seeding scripts
+/add_bulk_fee_endpoint.py
+/add_library_fee_category.py
+/apply_fee_assignment_patch.py
+/backup_school_db.py
+/fix_admin_receipt.py
+/inspect_fee_assignment_block.py
+/patch_period_validation.py
+/update_fee_assignment_ui.py
+/update_finance_receipt.py
+/update_frontend_finance.py
+/backend/add_shaan_uk_students.py
+/backend/create_admin.py
+/backend/create_super_admin.py
+/backend/reset_teacher_password.py
+/backend/migrate_admin_ownership.py
+/backend/migrate_teacher_access.py
+# Deployment safety: backups and temporary configuration copies
+*.backup.*
+*.backup_*
+*.bak
+*.orig
+deployment_config_backup_*/
+# Gallery images are transferred to persistent deployment storage separately
+backend/uploads/school_gallery/*
+!backend/uploads/school_gallery/.gitkeep
+# Local account-creation helper scripts
+backend/add_shaan_uk_students.py
+backend/create_admin.py
+backend/create_super_admin.py
+# Historical source-file backups - never publish
+*.before*
+*.import-position-backup
+*.exam-class-data-backup
+*.backup.*
+*.backup_*
+*.bak
+*.orig
+*.save
+# Generated deployment backup directories
+deployment_config_backup_*/
+# Keep local gallery files out of Git
+backend/uploads/school_gallery/*
+!backend/uploads/school_gallery/.gitkeep
+# Local account-creation helpers
+backend/add_shaan_uk_students.py
+backend/create_admin.py
+backend/create_super_admin.py

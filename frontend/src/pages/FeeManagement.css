@@ -1,0 +1,42 @@
+.fee-management{margin-top:22px;padding:clamp(16px,2.5vw,30px);border:1px solid #e4eaf2;border-radius:20px;background:linear-gradient(160deg,#fff,#fbfdff);box-shadow:0 12px 35px rgba(15,23,42,.055);color:#172033}
+.fee-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.fee-heading h2{margin:4px 0 8px;font-size:clamp(22px,3vw,30px);letter-spacing:-.035em;color:#101b31}
+.fee-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:24px 0;padding:7px;border:1px solid #e8edf5;border-radius:14px;background:#f6f8fc}
+.fee-tabs button{border:1px solid transparent;background:transparent;color:#526078;padding:10px 15px;border-radius:10px;cursor:pointer;font:inherit;font-size:14px;font-weight:650;transition:background .18s,color .18s}
+.fee-tabs button:hover{background:#eaf0fa;color:#172554}
+.fee-tabs button.active{background:#172554;color:white;box-shadow:0 4px 12px rgba(23,37,84,.18)}
+.fee-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:14px;margin:20px 0 30px}
+.fee-stats>div{position:relative;overflow:hidden;border:1px solid #e3eaf4;border-radius:16px;background:#fff;padding:20px;display:flex;flex-direction:column;gap:10px;box-shadow:0 5px 18px rgba(15,23,42,.035)}
+.fee-stats>div:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:#647ee8}
+.fee-stats>div:nth-child(2):before{background:#0d9488}.fee-stats>div:nth-child(3):before{background:#8b5cf6}.fee-stats>div:nth-child(4):before{background:#e5a12b}
+.fee-stats span{color:#66748b;font-size:13px;font-weight:600}
+.fee-stats strong{font-size:clamp(21px,2vw,27px);letter-spacing:-.035em;color:#101b31;overflow-wrap:anywhere}
+.fee-management h3{margin:24px 0 14px;color:#172033;font-size:18px}
+.fee-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:18px 0 28px;padding:clamp(14px,2vw,22px);border:1px solid #e5eaf2;border-radius:16px;background:#f9fbfe}
+.fee-form label{display:flex;flex-direction:column;gap:8px;min-width:0;font-size:13px;font-weight:700;color:#38465c}
+.fee-form input,.fee-form select{width:100%;min-width:0;box-sizing:border-box;border:1px solid #ccd6e4;border-radius:10px;padding:12px 13px;font:inherit;font-size:14px;background:#fff;color:#142039}
+.fee-form input:focus,.fee-form select:focus{outline:none;border-color:#526fe5;box-shadow:0 0 0 3px rgba(82,111,229,.13)}
+.fee-wide{grid-column:1/-1}.fee-form button{justify-self:start}
+.fee-status{display:inline-block;padding:5px 10px;border-radius:30px;font-size:12px;font-weight:750}
+.fee-status.paid{background:#dcfce7;color:#166534}.fee-status.partial{background:#fef3c7;color:#92400e}.fee-status.pending{background:#fee2e2;color:#991b1b}
+.fee-management .erp-table-wrap{width:100%;overflow-x:auto;border:1px solid #e4eaf2;border-radius:14px;background:#fff}
+.fee-management .erp-table{width:100%;border-collapse:collapse;min-width:720px}
+.fee-management .erp-table th{background:#f4f7fb;color:#526078;font-size:11px;letter-spacing:.055em;text-transform:uppercase;font-weight:750}
+.fee-management .erp-table th,.fee-management .erp-table td{padding:13px 15px;border-bottom:1px solid #edf1f6;text-align:left;vertical-align:middle}
+.fee-management .erp-table td{font-size:13px;color:#344158}
+.fee-management .erp-table tbody tr:hover{background:#f8faff}
+.fee-receipt{margin-top:22px;border:1px solid #dbe4f0;border-radius:18px;padding:clamp(18px,3vw,30px);background:#fff;box-shadow:0 10px 28px rgba(15,23,42,.06);color:#1a2740}
+.receipt-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding-bottom:20px;border-bottom:1px solid #e8edf4}
+.receipt-header h3{margin:3px 0 5px;font-size:23px}
+.receipt-kicker{margin:0;color:#536ee0;font-size:11px;font-weight:800;letter-spacing:.13em}
+.receipt-muted{margin:0;color:#78859a;font-size:13px}
+.receipt-paid{padding:7px 11px;border-radius:30px;background:#dcfce7;color:#166534;font-size:11px;font-weight:850;letter-spacing:.06em}
+.receipt-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 24px;margin:8px 0 18px}
+.receipt-grid>div{display:flex;flex-direction:column;gap:7px;padding:15px 0;border-bottom:1px solid #eef1f6;min-width:0}
+.receipt-grid span{font-size:12px;color:#78859a;font-weight:600}
+.receipt-grid strong{font-size:14px;color:#1b2942;overflow-wrap:anywhere;text-transform:capitalize}
+.receipt-grid .receipt-amount{grid-column:1/-1;margin-top:8px;padding:18px;border:1px solid #dce6ff;border-radius:12px;background:#f5f8ff}
+.receipt-grid .receipt-amount strong{font-size:26px;color:#263f9d}
+.receipt-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+@media(max-width:600px){.fee-form{grid-template-columns:1fr}.fee-wide{grid-column:auto}.fee-heading{align-items:flex-start}.fee-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.fee-tabs button{padding:10px 8px}.receipt-grid{grid-template-columns:1fr}.receipt-grid .receipt-amount{grid-column:auto}.fee-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.fee-stats>div{padding:15px 12px}}
+@media print{@page{size:A4;margin:14mm}body *{visibility:hidden!important}.fee-receipt,.fee-receipt *{visibility:visible!important}.fee-receipt{position:absolute!important;left:0!important;top:0!important;width:100%!important;box-sizing:border-box!important;margin:0!important;padding:22px!important;border:1px solid #cbd5e1!important;border-radius:0!important;box-shadow:none!important;background:#fff!important;color:#111827!important}.receipt-actions,.fee-receipt button{display:none!important}.receipt-grid>div,.receipt-header{break-inside:avoid}}
