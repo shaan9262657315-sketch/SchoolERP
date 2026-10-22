@@ -69,7 +69,7 @@ export default function Attendance() {
       const token = sessionStorage.getItem('school_erp_token');
 
       if (!token) {
-        throw new Error('Admin session nahi mila. Please login again.');
+        throw new Error('Admin session not found. Please log in again.');
       }
 
       const response = await fetch(`${API_URL}${path}`, {
@@ -115,10 +115,10 @@ export default function Attendance() {
       setRecords(initialRecords);
 
       if (list.length === 0) {
-        setMessage('Is class aur section mein koi student nahi mila.');
+        setMessage('No students were found in this class and section.');
       }
     } catch (err) {
-      setError(getErrorMessage(err, 'Students load nahi ho paaye.'));
+      setError(getErrorMessage(err, 'Unable to load students.'));
     } finally {
       setLoading(false);
     }
@@ -139,10 +139,10 @@ export default function Attendance() {
       setDailyRecords(Array.isArray(data) ? data : []);
 
       if (Array.isArray(data) && data.length === 0) {
-        setMessage('Is date ke liye koi saved attendance record nahi mila.');
+        setMessage('No saved attendance records were found for this date.');
       }
     } catch (err) {
-      setError(getErrorMessage(err, 'Daily report load nahi ho paayi.'));
+      setError(getErrorMessage(err, 'Unable to load the daily report.'));
     } finally {
       setReportLoading(false);
     }
@@ -164,10 +164,10 @@ export default function Attendance() {
       setMonthlyRecords(Array.isArray(data) ? data : []);
 
       if (Array.isArray(data) && data.length === 0) {
-        setMessage('Is class aur section mein koi student nahi mila.');
+        setMessage('No students were found in this class and section.');
       }
     } catch (err) {
-      setError(getErrorMessage(err, 'Monthly report load nahi ho paayi.'));
+      setError(getErrorMessage(err, 'Unable to load the monthly report.'));
     } finally {
       setReportLoading(false);
     }
@@ -199,7 +199,7 @@ export default function Attendance() {
 
   const saveAttendance = async () => {
     if (students.length === 0) {
-      setError('Attendance save karne ke liye students nahi hain.');
+      setError('There are no students available to save attendance for.');
       return;
     }
 
@@ -234,7 +234,7 @@ export default function Attendance() {
         );
       }
     } catch (err) {
-      setError(getErrorMessage(err, 'Attendance save nahi hui.'));
+      setError(getErrorMessage(err, 'Unable to save attendance.'));
     } finally {
       setSaving(false);
     }
@@ -257,7 +257,7 @@ export default function Attendance() {
           <p className="attendance-eyebrow">ADMINISTRATION</p>
           <h1>Attendance Management</h1>
           <p className="attendance-subtitle">
-            Attendance mark karo aur saved daily/monthly reports dekho.
+            Mark attendance and view saved daily and monthly reports.
           </p>
         </div>
         <button
@@ -400,9 +400,9 @@ export default function Attendance() {
             </div>
 
             {loading ? (
-              <p className="attendance-empty">Students load ho rahe hain...</p>
+              <p className="attendance-empty">Loading students...</p>
             ) : students.length === 0 ? (
-              <p className="attendance-empty">Students nahi mile. Class aur section check karo.</p>
+              <p className="attendance-empty">No students found. Check the class and section.</p>
             ) : (
               <div className="attendance-table-wrap">
                 <table className="attendance-table">
@@ -450,9 +450,9 @@ export default function Attendance() {
             <span>{reportDate}</span>
           </div>
           {reportLoading ? (
-            <p className="attendance-empty">Daily report load ho rahi hai...</p>
+            <p className="attendance-empty">Loading daily report...</p>
           ) : dailyRecords.length === 0 ? (
-            <p className="attendance-empty">Is date par koi saved attendance record nahi hai.</p>
+            <p className="attendance-empty">There are no saved attendance records for this date.</p>
           ) : (
             <>
               <section className="attendance-summary">
@@ -491,9 +491,9 @@ export default function Attendance() {
             <span>{reportMonth}/{reportYear}</span>
           </div>
           {reportLoading ? (
-            <p className="attendance-empty">Monthly report load ho rahi hai...</p>
+            <p className="attendance-empty">Loading monthly report...</p>
           ) : monthlyRecords.length === 0 ? (
-            <p className="attendance-empty">Is class aur section ke liye koi student nahi mila.</p>
+            <p className="attendance-empty">No students were found for this class and section.</p>
           ) : (
             <div className="attendance-table-wrap">
               <table className="attendance-table">
@@ -516,7 +516,7 @@ export default function Attendance() {
           )}
           <p className="attendance-note">
             Percentage = (Present days + Late days) ÷ Recorded days × 100.
-            Jis din attendance record nahi hai, woh total mein count nahi hota.
+            Days without an attendance record are excluded from the total.
           </p>
         </section>
       )}

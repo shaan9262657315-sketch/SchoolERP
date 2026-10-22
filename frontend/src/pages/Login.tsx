@@ -38,7 +38,7 @@ export default function Login() {
         )
       }
 
-      if (!data.access_token) throw new Error('Backend se login token nahi mila.')
+      if (!data.access_token) throw new Error('The login token was not received from the backend.')
 
       sessionStorage.setItem('school_erp_token', data.access_token)
       sessionStorage.setItem('school_erp_role', role)
@@ -63,10 +63,10 @@ export default function Login() {
     } catch (err) {
       setError(
         err instanceof TypeError
-          ? 'Backend se connection nahi ho raha. FastAPI check karein.'
+          ? 'Unable to connect to the backend. Please check that the FastAPI server is running.'
           : err instanceof Error
             ? err.message
-            : 'Login nahi ho saka. Dobara try karein.'
+            : 'Login failed. Please try again.'
       )
     } finally {
       setLoading(false)

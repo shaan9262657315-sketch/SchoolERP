@@ -67,7 +67,7 @@ class ClassAssignmentRequest(BaseModel):
     @classmethod
     def validate_class(cls, value: str) -> str:
         value = value.strip()
-        value = value.title() if value.lower() in {"nursery", "lkg", "ukg"} else value
+        value = {"nursery": "Nursery", "lkg": "LKG", "ukg": "UKG"}.get(value.lower(), value)
         if value not in VALID_CLASSES:
             raise ValueError("Invalid class.")
         return value

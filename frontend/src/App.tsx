@@ -32,9 +32,7 @@ function App({ school, gallery = [], notices = [] }: {
   gallery?: PublicGalleryItem[];
   notices?: PublicAnnouncement[];
 }) {
-  const [language, setLanguage] = useState<"EN" | "HI">("EN");
   const [menuOpen, setMenuOpen] = useState(false);
-  const hi = language === "HI";
   const schoolName = school?.school_name?.trim() || "YOUR SCHOOL";
   const schoolTagline = school?.tagline?.trim() || "KNOWLEDGE • CHARACTER • FUTURE";
   const assetUrl = (url: string) =>
@@ -62,11 +60,11 @@ function App({ school, gallery = [], notices = [] }: {
     <div className="site-shell">
       <div className="top-strip">
         <div className="container top-strip-inner">
-          <span>✦ {hi ? "सीखें • बढ़ें • उत्कृष्ट बनें" : "LEARN • GROW • EXCEL"}</span>
+          <span>✦ {'LEARN • GROW • EXCEL'}</span>
           <div className="top-links">
-            <a href="#contact">{hi ? "संपर्क करें" : "Contact Us"}</a>
+            <a href="#contact">{'Contact Us'}</a>
             <span className="top-divider">|</span>
-            <a href="#notices">{hi ? "नवीनतम सूचनाएँ" : "Latest Notices"}</a>
+            <a href="#notices">{'Latest Notices'}</a>
           </div>
         </div>
       </div>
@@ -91,16 +89,13 @@ function App({ school, gallery = [], notices = [] }: {
           </button>
 
           <nav className={menuOpen ? "nav-links nav-open" : "nav-links"}>
-            <a href="#home" onClick={closeMenu}>{hi ? "होम" : "Home"}</a>
-            <a href="#about" onClick={closeMenu}>{hi ? "हमारे बारे में" : "About"}</a>
-            <a href="#academics" onClick={closeMenu}>{hi ? "शिक्षा" : "Academics"}</a>
-            <a href="#facilities" onClick={closeMenu}>{hi ? "सुविधाएँ" : "Facilities"}</a>
-            <a href="#notices" onClick={closeMenu}>{hi ? "सूचनाएँ" : "Notices"}</a>
-            <button className="language-button" onClick={() => setLanguage(hi ? "EN" : "HI")}>
-              {hi ? "EN ↗" : "अ हिन्दी"}
-            </button>
+            <a href="#home" onClick={closeMenu}>{'Home'}</a>
+            <a href="#about" onClick={closeMenu}>{'About'}</a>
+            <a href="#academics" onClick={closeMenu}>{'Academics'}</a>
+            <a href="#facilities" onClick={closeMenu}>{'Facilities'}</a>
+            <a href="#notices" onClick={closeMenu}>{'Notices'}</a>
             <a className="nav-cta" href="#admissions" onClick={closeMenu}>
-              {hi ? "प्रवेश जानकारी ↗" : "Admissions ↗"}
+              {'Admissions ↗'}
             </a>
           </nav>
         </div>
@@ -112,16 +107,16 @@ function App({ school, gallery = [], notices = [] }: {
           <div className="hero-orb orb-two" />
           <div className="container hero-grid">
             <div className="hero-content">
-              <div className="eyebrow"><span className="eyebrow-dot" /> {hi ? "एक बेहतर भविष्य की शुरुआत" : "A BETTER FUTURE STARTS HERE"}</div>
-              <h1>{school ? <>Welcome to<br /><span>{schoolName}</span></> : (hi ? <>हर बच्चे में<br />छिपी है <span>एक नई<br />संभावना।</span></> : <>Every child has<br />a world of <span>possibility</span><br />within.</>)}</h1>
-              <p className="hero-description">{school ? schoolTagline : (hi ? "हम एक ऐसा वातावरण बनाते हैं जहाँ बच्चे ज्ञान प्राप्त करें, अच्छे संस्कार सीखें और अपने सपनों को साकार करें।" : "We create an environment where young minds discover their strengths, build character and gain the confidence to shape tomorrow.")}</p>
+              <div className="eyebrow"><span className="eyebrow-dot" /> {'A BETTER FUTURE STARTS HERE'}</div>
+              <h1>{school ? <>Welcome to<br /><span>{schoolName}</span></> : <>Every child has<br />a world of <span>possibility</span><br />within.</>}</h1>
+              <p className="hero-description">{school ? schoolTagline : ('We create an environment where young minds discover their strengths, build character and gain the confidence to shape tomorrow.')}</p>
               <div className="hero-actions">
-                <a className="button button-primary" href="#admissions">{hi ? "प्रवेश के बारे में जानें" : "Explore Admissions"} <span>↗</span></a>
-                <a className="button button-outline" href="#about"><span className="play-icon">▶</span> {hi ? "हमारे विद्यालय को जानें" : "Discover Our School"}</a>
+                <a className="button button-primary" href="#admissions">{'Explore Admissions'} <span>↗</span></a>
+                <a className="button button-outline" href="#about"><span className="play-icon">▶</span> {'Discover Our School'}</a>
               </div>
               <div className="hero-trust">
                 <div className="trust-avatars"><span>👩🏻‍🏫</span><span>👨🏽‍🎓</span><span>👩🏽‍🎓</span></div>
-                <div><strong>A community that cares</strong><small>{hi ? "हर विद्यार्थी, हर दिन महत्वपूर्ण है।" : "Every student matters, every day."}</small></div>
+                <div><strong>A community that cares</strong><small>{'Every student matters, every day.'}</small></div>
               </div>
             </div>
 
@@ -155,14 +150,14 @@ function App({ school, gallery = [], notices = [] }: {
             </div>
           </div>
           <div className="hero-bottom container">
-            <span>01 — 04</span><div className="hero-progress"><i /></div><span>{hi ? "भविष्य के लिए तैयार" : "PREPARING FOR TOMORROW"}</span>
+            <span>01 — 04</span><div className="hero-progress"><i /></div><span>{'PREPARING FOR TOMORROW'}</span>
           </div>
         </section>
 
 {!school && (
         <section className="stats-section">
           <div className="container stats-grid">
-            <div className="stat-intro"><span className="section-kicker">OUR SCHOOL AT A GLANCE</span><p>{hi ? "एक ऐसा समुदाय जहाँ हर बच्चे को आगे बढ़ने का अवसर मिलता है।" : "A community built around the potential of every learner."}</p></div>
+            <div className="stat-intro"><span className="section-kicker">OUR SCHOOL AT A GLANCE</span><p>{'A community built around the potential of every learner.'}</p></div>
             <div className="stat-item"><strong>XX<span>+</span></strong><small>Years of Learning</small></div>
             <div className="stat-item"><strong>XXX<span>+</span></strong><small>Happy Students</small></div>
             <div className="stat-item"><strong>XX<span>+</span></strong><small>Dedicated Educators</small></div>
@@ -178,7 +173,7 @@ function App({ school, gallery = [], notices = [] }: {
               <div className="about-note"><span>✦</span><div><strong>Learning with purpose</strong><small>Building tomorrow, today.</small></div></div>
             </div>
             <div className="about-copy">
-              <span className="section-kicker">{hi ? schoolName : `WELCOME TO ${schoolName}`}</span>
+              <span className="section-kicker">{`WELCOME TO ${schoolName}`}</span>
               <h2>More than a school.<br /><span>A place to become.</span></h2>
               <p className="section-description">{school?.description?.trim() || "Education is not just about what students know. It is about who they become. We bring together thoughtful teaching, meaningful experiences and a caring community to help every learner find their path."}</p>
               <div className="value-list">

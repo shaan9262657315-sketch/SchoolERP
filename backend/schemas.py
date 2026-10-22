@@ -50,7 +50,7 @@ class StudentCreate(BaseModel):
     @classmethod
     def validate_class_name(cls, value: str) -> str:
         value = value.strip()
-        normalized = value.title() if value.lower() in {"nursery", "lkg", "ukg"} else value
+        normalized = {"nursery": "Nursery", "lkg": "LKG", "ukg": "UKG"}.get(value.lower(), value)
         if normalized not in VALID_CLASSES:
             raise ValueError("Class must be Nursery, LKG, UKG, or a number from 1 to 12.")
         return normalized

@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import './FeeManagement.css'
 
 type Student = {
@@ -91,7 +91,7 @@ export default function FeeManagement({ students, apiRequest }: Props) {
       setLedger(Array.isArray(l) ? l : [])
       setPayments(Array.isArray(p) ? p : [])
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Fee data load nahi hua.')
+      setError(e instanceof Error ? e.message : 'Unable to load fee data.')
     } finally {
       setBusy(false)
     }
@@ -121,7 +121,7 @@ export default function FeeManagement({ students, apiRequest }: Props) {
       setMessage('Fee structure successfully create ho gaya.')
       await loadData()
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Fee structure create nahi hua.')
+      setError(e instanceof Error ? e.message : 'Unable to create the fee structure.')
     } finally {
       setBusy(false)
     }
@@ -131,12 +131,12 @@ export default function FeeManagement({ students, apiRequest }: Props) {
     e.preventDefault()
     setError('')
     setMessage('')
-    if (!studentId) { setError('Student select karo.'); return }
-    if (!selectedStructure) { setError('Active fee structure select karo.'); return }
+    if (!studentId) { setError('Please select a student.'); return }
+    if (!selectedStructure) { setError('Please select an active fee structure.'); return }
     const student = students.find(s => String(s.id) === studentId)
-    if (!student) { setError('Selected student nahi mila.'); return }
+    if (!student) { setError('The selected student could not be found.'); return }
     if (student.class_name !== selectedStructure.class_name || student.section !== selectedStructure.section) {
-      setError('Fee structure student ki class aur section se match nahi karta.')
+      setError("The fee structure does not match the student's class and section.")
       return
     }
     setBusy(true)
@@ -156,7 +156,7 @@ export default function FeeManagement({ students, apiRequest }: Props) {
       setMessage('Student fee ledger mein add ho gayi.')
       await loadData()
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Student fee assign nahi hui.')
+      setError(e instanceof Error ? e.message : 'Unable to assign the student fee.')
     } finally {
       setBusy(false)
     }
@@ -167,11 +167,11 @@ export default function FeeManagement({ students, apiRequest }: Props) {
     setError('')
     setMessage('')
     if (!selectedStructure) {
-      setError('Active fee structure select karo.')
+      setError('Please select an active fee structure.')
       return
     }
     if (selectedStructure.class_name !== className || selectedStructure.section !== section) {
-      setError('Selected fee structure ki class aur section match nahi karte.')
+      setError("The selected fee structure's class and section do not match.")
       return
     }
     if (!window.confirm(`Assign ${selectedStructure.fee_type.replaceAll('_', ' ')} fee to all students in ${className}-${section} for ${selectedPeriod}? Existing entries will be skipped.`)) return
@@ -188,7 +188,7 @@ export default function FeeManagement({ students, apiRequest }: Props) {
       setMessage(`Class assignment complete. Matched: ${result.students_matched}, created: ${result.created}, skipped existing: ${result.skipped_existing}.`)
       await loadData()
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Class fee assign nahi hui.')
+      setError(e instanceof Error ? e.message : 'Unable to assign the class fee.')
     } finally {
       setBusy(false)
     }
@@ -198,10 +198,10 @@ export default function FeeManagement({ students, apiRequest }: Props) {
     e.preventDefault()
     setError('')
     setMessage('')
-    if (!selectedLedger) { setError('Pending fee select karo.'); return }
+    if (!selectedLedger) { setError('Please select a pending fee.'); return }
     const value = Number(paymentAmount)
     if (!(value > 0) || value > pending(selectedLedger)) {
-      setError(`Amount positive hona chahiye aur pending balance ${money(pending(selectedLedger))} se zyada nahi ho sakta.`)
+      setError(`Amount must be positive and cannot exceed the pending balance of ${money(pending(selectedLedger))}.`)
       return
     }
     setBusy(true)
@@ -215,11 +215,11 @@ export default function FeeManagement({ students, apiRequest }: Props) {
         }),
       })
       setReceipt(result)
-      setMessage('Payment record ho gayi. Receipt number neeche diya hai.')
+      setMessage('Payment recorded successfully. The receipt number is shown below.')
       setPaymentAmount('')
       await loadData()
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Payment record nahi hui.')
+      setError(e instanceof Error ? e.message : 'Unable to record the payment.')
     } finally {
       setBusy(false)
     }
@@ -231,7 +231,7 @@ export default function FeeManagement({ students, apiRequest }: Props) {
       const data = await apiRequest(`${BASE}/payments/${paymentId}/receipt`)
       setReceipt(data)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Receipt load nahi hui.')
+      setError(e instanceof Error ? e.message : 'Unable to load the receipt.')
     }
   }
 
@@ -334,7 +334,7 @@ export default function FeeManagement({ students, apiRequest }: Props) {
       </>}
       {tab === 'collect' && <>
         <h3>Collect offline payment</h3>
-        <p className="erp-help">Sirf actual payment receive hone par submit karein. Payment amount pending balance se zyada nahi ho sakta.</p>
+        <p className="erp-help">Submit only after receiving the actual payment. The payment amount cannot exceed the pending balance.</p>
         <form className="fee-form" onSubmit={collectPayment}>
           <label className="fee-wide">Pending fee entry<select required value={paymentLedgerId} onChange={e => setPaymentLedgerId(e.target.value)}><option value="">Select student fee</option>{ledger.filter(x => pending(x) > 0).map(x => <option key={x.id} value={x.id}>{studentName(x.student_id)} · {x.period} · Pending {money(pending(x))}</option>)}</select></label>
           {selectedLedger && <p className="fee-wide">Due {money(selectedLedger.amount_due)} · Paid {money(selectedLedger.amount_paid)} · Pending <strong>{money(pending(selectedLedger))}</strong></p>}

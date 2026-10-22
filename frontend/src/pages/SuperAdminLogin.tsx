@@ -45,10 +45,10 @@ export default function SuperAdminLogin() {
     } catch (err) {
       setError(
         err instanceof TypeError
-          ? 'Backend se connection nahi ho raha. FastAPI server check karein.'
+          ? 'Unable to connect to the backend. Please check that the FastAPI server is running.'
           : err instanceof Error
             ? err.message
-            : 'Login nahi ho saka. Dobara try karein.',
+            : 'Login failed. Please try again.',
       )
     } finally {
       setLoading(false)

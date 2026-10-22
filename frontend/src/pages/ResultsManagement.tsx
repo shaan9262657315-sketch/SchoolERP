@@ -104,7 +104,7 @@ export default function ResultsManagement() {
 
       setSelectedId(nextId)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Exams load nahi hue.')
+      setError(err instanceof Error ? err.message : 'Unable to load exams.')
     } finally {
       setLoading(false)
     }
@@ -129,7 +129,7 @@ export default function ResultsManagement() {
       setMarks(nextMarks)
     } catch (err) {
       setMarksData(null)
-      setError(err instanceof Error ? err.message : 'Student marks load nahi hue.')
+      setError(err instanceof Error ? err.message : 'Unable to load student marks.')
     }
   }
 
@@ -161,9 +161,9 @@ export default function ResultsManagement() {
         }),
       })
       await loadExams(created?.id)
-      setMessage('Exam create ho gaya.')
+      setMessage('Exam created successfully.')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Exam create nahi hua.')
+      setError(err instanceof Error ? err.message : 'Unable to create the exam.')
     } finally {
       setSaving(false)
     }
@@ -195,9 +195,9 @@ export default function ResultsManagement() {
         }),
       })
       await loadExams(selectedExam.id)
-      setMessage('Exam update ho gaya.')
+      setMessage('Exam updated successfully.')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Exam update nahi hua.')
+      setError(err instanceof Error ? err.message : 'Unable to update the exam.')
     }
   }
 
@@ -209,7 +209,7 @@ export default function ResultsManagement() {
 
     const maximum = Number(maxMarks)
     if (!subjectName.trim() || !Number.isFinite(maximum) || maximum <= 0) {
-      setError('Subject name aur positive maximum marks enter karo.')
+      setError('Enter a subject name and a positive maximum mark.')
       return
     }
 
@@ -225,9 +225,9 @@ export default function ResultsManagement() {
       setSubjectName('')
       await loadExams(selectedExam.id)
       await loadMarks(selectedExam.id)
-      setMessage('Subject add ho gaya.')
+      setMessage('Subject added successfully.')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Subject add nahi hua.')
+      setError(err instanceof Error ? err.message : 'Unable to add the subject.')
     } finally {
       setSaving(false)
     }
@@ -243,7 +243,7 @@ export default function ResultsManagement() {
     const maximum = Number(maximumText)
 
     if (!Number.isFinite(maximum) || maximum <= 0) {
-      setError('Maximum marks positive number hona chahiye.')
+      setError('Maximum marks must be a positive number.')
       return
     }
 
@@ -259,9 +259,9 @@ export default function ResultsManagement() {
       })
       await loadExams(selectedExam.id)
       await loadMarks(selectedExam.id)
-      setMessage('Subject update ho gaya.')
+      setMessage('Subject updated successfully.')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Subject update nahi hua.')
+      setError(err instanceof Error ? err.message : 'Unable to update the subject.')
     }
   }
 
@@ -277,9 +277,9 @@ export default function ResultsManagement() {
       })
       await loadExams(selectedExam.id)
       await loadMarks(selectedExam.id)
-      setMessage('Subject delete ho gaya.')
+      setMessage('Subject deleted successfully.')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Subject delete nahi hua.')
+      setError(err instanceof Error ? err.message : 'Unable to delete the subject.')
     }
   }
 
@@ -300,7 +300,7 @@ export default function ResultsManagement() {
             const value = Number(marks[`${student.student_id}:${subject.id}`])
             if (!Number.isFinite(value) || value < 0 || value > subject.max_marks) {
               throw new Error(
-                `${student.full_name}: ${subject.subject_name} ke marks 0 se ${subject.max_marks} ke beech hone chahiye.`,
+                `${student.full_name}: Marks for ${subject.subject_name} must be between 0 and ${subject.max_marks}.`,
               )
             }
             return { student_id: student.student_id, obtained_marks: value }
@@ -317,7 +317,7 @@ export default function ResultsManagement() {
       await loadMarks(selectedExam.id)
       setMessage('Marks save ho gaye.')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Marks save nahi hue.')
+      setError(err instanceof Error ? err.message : 'Unable to save marks.')
     } finally {
       setSaving(false)
     }
@@ -325,7 +325,7 @@ export default function ResultsManagement() {
 
   async function publishResults() {
     if (!selectedExam) return
-    if (!window.confirm('Results publish karne hain? Students published results dekh sakenge.')) {
+    if (!window.confirm('Publish these results? Students will be able to view the published results.')) {
       return
     }
 
@@ -338,9 +338,9 @@ export default function ResultsManagement() {
       })
       await loadExams(selectedExam.id)
       await loadMarks(selectedExam.id)
-      setMessage('Results publish ho gaye.')
+      setMessage('Results published successfully.')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Results publish nahi hue.')
+      setError(err instanceof Error ? err.message : 'Unable to publish results.')
     } finally {
       setSaving(false)
     }
@@ -410,14 +410,14 @@ export default function ResultsManagement() {
           </button>
         </form>
         <p style={{ color: '#6b7280', fontSize: 13 }}>
-          Exam assigned teacher ke allocated class/section ke liye create hoga.
+          The exam will be created for the class/section assigned to the teacher.
         </p>
       </div>
 
       <div>
         <h3>Select Exam</h3>
         {exams.length === 0 ? (
-          <p>{loading ? 'Loading exams...' : 'No exams available. Upar se apna first exam create karo.'}</p>
+          <p>{loading ? 'Loading exams...' : 'No exams available. Create your first exam using the form above.'}</p>
         ) : (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
             <select
@@ -506,7 +506,7 @@ export default function ResultsManagement() {
             <div className="td-section-heading">
               <div>
                 <h3>Student-wise Marks</h3>
-                <p>Marks 0 se maximum marks ke beech enter karo. Blank fields save nahi honge.</p>
+                <p>Enter marks between 0 and the maximum marks. Blank fields will not be saved.</p>
               </div>
               <button type="button" style={buttonStyle} onClick={() => void loadMarks(selectedExam.id)}>
                 Reload Students
@@ -514,11 +514,11 @@ export default function ResultsManagement() {
             </div>
 
             {!marksData ? (
-              <p>Student marks load ho rahe hain ya API response available nahi hai.</p>
+              <p>Student marks are loading, or the API response is unavailable.</p>
             ) : marksData.students.length === 0 ? (
-              <p>Is assigned class/section ke students nahi mile.</p>
+              <p>No students were found in the assigned class and section.</p>
             ) : subjects.length === 0 ? (
-              <p>Pehle kam se kam ek subject add karo.</p>
+              <p>Add at least one subject first.</p>
             ) : (
               <>
                 <div style={{ overflowX: 'auto' }}>

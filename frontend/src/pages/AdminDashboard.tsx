@@ -172,7 +172,7 @@ export default function AdminDashboard() {
       throw new Error(
         typeof data.detail === 'string'
           ? data.detail
-          : 'Is feature ko access karne ki permission nahi hai.'
+          : 'You do not have permission to access this feature.'
       )
     }
 
@@ -194,7 +194,7 @@ export default function AdminDashboard() {
       const data = await apiRequest('/admin/students')
       setStudents(Array.isArray(data) ? data : [])
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Students load nahi ho sake.')
+      setError(err instanceof Error ? err.message : 'Unable to load students.')
     } finally {
       setLoading(false)
     }
@@ -209,7 +209,7 @@ export default function AdminDashboard() {
       setTeachers(Array.isArray(teacherData) ? teacherData : [])
       setAssignments(Array.isArray(assignmentData) ? assignmentData : [])
     } catch (err) {
-      setTeacherError(err instanceof Error ? err.message : 'Teacher list load nahi hui.')
+      setTeacherError(err instanceof Error ? err.message : 'Unable to load the teacher list.')
     }
   }, [apiRequest])
 
@@ -234,7 +234,7 @@ export default function AdminDashboard() {
       setTeacherMessage('Teacher created successfully.')
       await loadTeacherManagement()
     } catch (err) {
-      setTeacherError(err instanceof Error ? err.message : 'Teacher create nahi hua.')
+      setTeacherError(err instanceof Error ? err.message : 'Unable to create the teacher.')
     } finally {
       setTeacherBusy(false)
     }
@@ -270,7 +270,7 @@ export default function AdminDashboard() {
       setTeacherMessage('Class assignment saved successfully.')
       await loadTeacherManagement()
     } catch (err) {
-      setTeacherError(err instanceof Error ? err.message : 'Assignment save nahi hua.')
+      setTeacherError(err instanceof Error ? err.message : 'Unable to save the assignment.')
     } finally {
       setTeacherBusy(false)
     }
@@ -311,7 +311,7 @@ export default function AdminDashboard() {
         if (!cancelled) setDailyRecords(Array.isArray(data) ? data : [])
       } catch (err) {
         if (!cancelled) {
-          setDailyError(err instanceof Error ? err.message : 'Daily report load nahi hui.')
+          setDailyError(err instanceof Error ? err.message : 'Unable to load the daily report.')
         }
       } finally {
         if (!cancelled) setDailyLoading(false)
@@ -341,7 +341,7 @@ export default function AdminDashboard() {
         if (!cancelled) setMonthlyRecords(Array.isArray(data) ? data : [])
       } catch (err) {
         if (!cancelled) {
-          setMonthlyError(err instanceof Error ? err.message : 'Monthly report load nahi hui.')
+          setMonthlyError(err instanceof Error ? err.message : 'Unable to load the monthly report.')
         }
       } finally {
         if (!cancelled) setMonthlyLoading(false)
@@ -384,7 +384,7 @@ export default function AdminDashboard() {
       setForm(emptyForm)
       await loadStudents()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Student save nahi ho saka.')
+      setError(err instanceof Error ? err.message : 'Unable to save the student.')
     } finally {
       setSaving(false)
     }
@@ -464,7 +464,7 @@ export default function AdminDashboard() {
       const data = await apiRequest('/announcements/admin')
       setAdminAnnouncements(Array.isArray(data) ? data : [])
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Announcements load nahi ho sakin.')
+      setError(err instanceof Error ? err.message : 'Unable to load announcements.')
     } finally {
       setAnnouncementLoading(false)
     }
@@ -496,7 +496,7 @@ export default function AdminDashboard() {
       setMessage('Announcement published successfully.')
       await loadAnnouncements()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Announcement publish nahi hui.')
+      setError(err instanceof Error ? err.message : 'Unable to publish the announcement.')
     } finally {
       setAnnouncementSaving(false)
     }
@@ -532,7 +532,7 @@ export default function AdminDashboard() {
       setMessage('Announcement updated successfully.')
       await loadAnnouncements()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Announcement update nahi hui.')
+      setError(err instanceof Error ? err.message : 'Unable to update the announcement.')
     } finally {
       setAnnouncementSaving(false)
     }
@@ -547,7 +547,7 @@ export default function AdminDashboard() {
       setAdminAnnouncements(current => current.filter(item => item.id !== id))
       setMessage('Announcement deleted successfully.')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Announcement delete nahi hui.')
+      setError(err instanceof Error ? err.message : 'Unable to delete the announcement.')
     }
   }
 
@@ -721,7 +721,7 @@ export default function AdminDashboard() {
             <div>
               <p className="erp-eyebrow">ATTENDANCE OVERVIEW</p>
               <h2>Daily Attendance</h2>
-              <p className="erp-help">Date, class aur section select karke daily summary dekhein.</p>
+              <p className="erp-help">Select a date, class, and section to view the daily summary.</p>
             </div>
             <span className="erp-report-tag">Daily report</span>
           </div>
@@ -1021,7 +1021,7 @@ export default function AdminDashboard() {
           <h2>{editingStudent ? 'Edit student' : 'Add a student'}</h2>
           <p className="erp-help">
             {editingStudent
-              ? 'Student details update karein. Existing password change nahi hoga.'
+              ? 'Update student details. The existing password will remain unchanged.'
               : 'Date of birth se initial password DDMMYYYY format mein set hoga.'}
           </p>
 

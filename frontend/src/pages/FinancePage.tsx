@@ -61,7 +61,7 @@ export default function FinancePage() {
         const data = await apiRequest('/admin/students')
         if (!cancelled) setStudents(Array.isArray(data) ? data : [])
       } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : 'Students load nahi ho sake.')
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Unable to load students.')
       } finally {
         if (!cancelled) setLoading(false)
       }

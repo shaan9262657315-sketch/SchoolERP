@@ -125,7 +125,7 @@ export default function SuperAdminDashboard() {
       setNewSchoolAddress('')
       setShowCreateForm(false)
     } catch (err) {
-      setCreateSchoolError(err instanceof Error ? err.message : 'School create nahi ho saka.')
+      setCreateSchoolError(err instanceof Error ? err.message : 'Unable to create the school.')
     } finally {
       setCreateSchoolLoading(false)
     }
@@ -208,7 +208,7 @@ export default function SuperAdminDashboard() {
       setEditingSchoolId(null)
       setManagementMessage(data.message || 'School details updated successfully.')
     } catch (err) {
-      setManagementError(err instanceof Error ? err.message : 'School details update nahi ho sake.')
+      setManagementError(err instanceof Error ? err.message : 'Unable to update school details.')
     } finally {
       setManagementBusyId(null)
     }
@@ -251,7 +251,7 @@ export default function SuperAdminDashboard() {
       await refreshSchoolDirectory(token)
       setManagementMessage(data.message || successFallback)
     } catch (err) {
-      setManagementError(err instanceof Error ? err.message : 'Admin action complete nahi hua.')
+      setManagementError(err instanceof Error ? err.message : 'The admin action could not be completed.')
     } finally {
       setManagementBusyId(null)
     }
@@ -368,7 +368,7 @@ export default function SuperAdminDashboard() {
             setSchoolsError(
               schoolErr instanceof Error
                 ? schoolErr.message
-                : 'School directory load nahi ho saka.',
+                : 'Unable to load the school directory.',
             )
           }
         } finally {
@@ -378,10 +378,10 @@ export default function SuperAdminDashboard() {
         if (!cancelled) {
           setError(
             err instanceof TypeError
-              ? 'Backend se connection nahi ho raha. FastAPI server check karein.'
+              ? 'Unable to connect to the backend. Please check that the FastAPI server is running.'
               : err instanceof Error
                 ? err.message
-                : 'Profile load nahi ho saka.',
+                : 'Unable to load the profile.',
           )
         }
       } finally {

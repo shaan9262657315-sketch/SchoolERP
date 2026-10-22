@@ -86,7 +86,7 @@ export default function StudentDashboard() {
     })
       .then(async response => {
         const data = await response.json().catch(() => ({}))
-        if (!response.ok) throw new Error(data.detail || 'Fees load nahi ho sakin.')
+        if (!response.ok) throw new Error(data.detail || 'Unable to load fees.')
         return data
       })
       .then(data => setFees(Array.isArray(data.fees) ? data.fees : []))
@@ -106,7 +106,7 @@ export default function StudentDashboard() {
     })
       .then(async response => {
         const data = await response.json().catch(() => ({}))
-        if (!response.ok) throw new Error(data.detail || 'Announcements load nahi ho sakin.')
+        if (!response.ok) throw new Error(data.detail || 'Unable to load announcements.')
         return data
       })
       .then(data => {
@@ -135,7 +135,7 @@ export default function StudentDashboard() {
       .then(async response => {
         const data = await response.json().catch(() => ({}))
         if (!response.ok) {
-          throw new Error(data.detail || 'Homework load nahi ho saka.')
+          throw new Error(data.detail || 'Unable to load homework.')
         }
         return data
       })
@@ -146,7 +146,7 @@ export default function StudentDashboard() {
       })
       .catch(err => {
         if (!cancelled) {
-          setHomeworkError(err instanceof Error ? err.message : 'Homework load nahi ho saka.')
+          setHomeworkError(err instanceof Error ? err.message : 'Unable to load homework.')
         }
       })
       .finally(() => {
@@ -178,7 +178,7 @@ export default function StudentDashboard() {
       .then(async response => {
         const data = await response.json().catch(() => ({}))
         if (!response.ok) {
-          throw new Error(data.detail || 'Results load nahi ho sake.')
+          throw new Error(data.detail || 'Unable to load results.')
         }
         return data
       })
@@ -189,7 +189,7 @@ export default function StudentDashboard() {
       })
       .catch(err => {
         if (!cancelled) {
-          setResultsError(err instanceof Error ? err.message : 'Results load nahi ho sake.')
+          setResultsError(err instanceof Error ? err.message : 'Unable to load results.')
         }
       })
       .finally(() => {

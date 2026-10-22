@@ -118,9 +118,9 @@ export default function TeacherDashboard() {
     })
     const data = await response.json().catch(() => ({}))
     if (response.status === 401 || response.status === 403) {
-      throw new Error(response.status === 401 ? 'Session expire ho gaya. Dobara login karein.' : (data.detail || 'Access denied.'))
+      throw new Error(response.status === 401 ? 'Your session has expired. Please log in again.' : (data.detail || 'Access denied.'))
     }
-    if (!response.ok) throw new Error(data.detail || 'Request complete nahi ho saki.')
+    if (!response.ok) throw new Error(data.detail || 'The request could not be completed.')
     return data
   }, [token])
 
@@ -141,7 +141,7 @@ export default function TeacherDashboard() {
         setStudents(list)
         setStatuses(Object.fromEntries(list.map((s: Student) => [s.id, 'Present'])))
       } catch (err) {
-        if (active) setError(err instanceof Error ? err.message : 'Dashboard load nahi hua.')
+        if (active) setError(err instanceof Error ? err.message : 'Unable to load the dashboard.')
       } finally {
         if (active) setLoading(false)
       }
@@ -154,11 +154,11 @@ export default function TeacherDashboard() {
     setError('')
     setMessage('')
     if (attendanceDate > localDate()) {
-      setError('Future date ki attendance mark nahi kar sakte.')
+      setError('Attendance cannot be marked for a future date.')
       return
     }
     if (!students.length) {
-      setError('Assigned class mein koi student nahi mila.')
+      setError('No students were found in the assigned class.')
       return
     }
     setSaving(true)
@@ -175,7 +175,7 @@ export default function TeacherDashboard() {
       })
       setMessage(`${result.message} Total records: ${result.records_saved}`)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Attendance save nahi hui.')
+      setError(err instanceof Error ? err.message : 'Unable to save attendance.')
     } finally {
       setSaving(false)
     }
@@ -189,7 +189,7 @@ export default function TeacherDashboard() {
       setDaily(result)
       setMessage(`Daily report loaded: ${result.length} recorded students.`)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Daily report load nahi hui.')
+      setError(err instanceof Error ? err.message : 'Unable to load the daily report.')
     }
   }
 
@@ -201,7 +201,7 @@ export default function TeacherDashboard() {
       setMonthly(result)
       setMessage('Monthly report loaded.')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Monthly report load nahi hui.')
+      setError(err instanceof Error ? err.message : 'Unable to load the monthly report.')
     }
   }
 
@@ -214,7 +214,7 @@ export default function TeacherDashboard() {
       const result = await api('/teacher/homework')
       setHomework(result)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Homework load nahi hua.')
+      setError(err instanceof Error ? err.message : 'Unable to load homework.')
     } finally {
       setHomeworkLoading(false)
     }
@@ -237,7 +237,7 @@ export default function TeacherDashboard() {
     setMessage('')
 
     if (homeworkForm.due_date < homeworkForm.assigned_date) {
-      setError('Due date assigned date se pehle nahi ho sakti.')
+      setError('The due date cannot be earlier than the assigned date.')
       return
     }
 
@@ -255,7 +255,7 @@ export default function TeacherDashboard() {
       resetHomeworkForm()
       await loadHomework()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Homework save nahi hua.')
+      setError(err instanceof Error ? err.message : 'Unable to save homework.')
     } finally {
       setHomeworkSaving(false)
     }
@@ -287,7 +287,7 @@ export default function TeacherDashboard() {
       if (editingHomeworkId === item.id) resetHomeworkForm()
       setMessage('Homework deleted successfully.')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Homework delete nahi hua.')
+      setError(err instanceof Error ? err.message : 'Unable to delete homework.')
     }
   }
 
