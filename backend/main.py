@@ -1,4 +1,4 @@
-import config_env
+﻿import config_env
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -55,6 +55,11 @@ app.include_router(super_admin_router)
 app.include_router(platform_management_router)
 app.include_router(attendance_router)
 
+
+@app.on_event("startup")
+def create_admin_table_safely():
+    from models import Admin
+    Admin.__table__.create(bind=engine, checkfirst=True)
 
 @app.on_event("startup")
 def create_super_admin_table_safely():
@@ -143,3 +148,4 @@ def migrate_announcement_display_date():
 @app.on_event("startup")
 def initialize_platform_management_safely():
     initialize_platform_management()
+
